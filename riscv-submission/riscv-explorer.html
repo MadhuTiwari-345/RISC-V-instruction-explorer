@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RISC-V Instruction Set Explorer</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#070a0f;--sf:#0d1117;--sf2:#161b27;
+  --bd:#21293d;--bd2:#2d3a52;
+  --cy:#00d4ff;--or:#ff7b3a;--gr:#39ff8c;
+  --ye:#ffd93d;--pu:#c77dff;--re:#ff4d6d;
+  --tx:#c9d1d9;--dm:#586374;
+  --mo:'JetBrains Mono',monospace;
+  --di:'Orbitron',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font-family:var(--mo);min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:radial-gradient(circle,rgba(0,212,255,.06) 1px,transparent 1px);
+  background-size:30px 30px;}
+#app{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:1.5rem 1.25rem 4rem;}
+/* Header */
+header{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+  padding-bottom:1.2rem;margin-bottom:1.5rem;border-bottom:1px solid var(--bd);}
+.chip{font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;color:var(--cy);
+  background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.22);border-radius:4px;
+  padding:.2em .6em;display:inline-block;margin-bottom:.4rem;}
+h1{font-family:var(--di);font-size:clamp(1.2rem,3vw,1.9rem);font-weight:900;
+  letter-spacing:.06em;color:#fff;text-shadow:0 0 28px rgba(0,212,255,.35);}
+.sub{font-size:.68rem;color:var(--dm);margin-top:.3rem;}
+#btn{font-family:var(--di);font-size:.7rem;font-weight:700;letter-spacing:.1em;
+  background:var(--cy);color:#000;border:none;border-radius:4px;
+  padding:.65rem 1.4rem;cursor:pointer;white-space:nowrap;
+  box-shadow:0 0 22px rgba(0,212,255,.3);transition:box-shadow .2s,transform .15s;}
+#btn:hover{box-shadow:0 0 38px rgba(0,212,255,.55);transform:translateY(-1px);}
+#btn:disabled{opacity:.35;cursor:not-allowed;transform:none;}
+/* Cards */
+.cards{display:flex;flex-direction:column;gap:1.1rem;}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:8px;overflow:hidden;}
+.ch{display:flex;align-items:center;gap:.8rem;padding:.85rem 1.2rem;
+  border-bottom:1px solid var(--bd);cursor:pointer;
+  background:rgba(255,255,255,.012);}
+.ch:hover{background:rgba(255,255,255,.025);}
+.tn{font-family:var(--di);font-size:.58rem;font-weight:700;letter-spacing:.1em;
+  padding:.22em .65em;border-radius:3px;flex-shrink:0;}
+.t1 .tn{background:rgba(0,212,255,.1);color:var(--cy);border:1px solid rgba(0,212,255,.25);}
+.t2 .tn{background:rgba(255,123,58,.1);color:var(--or);border:1px solid rgba(255,123,58,.25);}
+.t3 .tn{background:rgba(57,255,140,.1);color:var(--gr);border:1px solid rgba(57,255,140,.25);}
+.ct{font-size:.82rem;font-weight:700;color:var(--tx);}
+.cs{margin-left:auto;display:flex;align-items:center;gap:.5rem;font-size:.62rem;color:var(--dm);}
+.led{width:7px;height:7px;border-radius:50%;background:var(--dm);}
+.led.run{background:var(--cy);animation:blink 1s infinite;}
+.led.ok{background:var(--gr);}
+.led.err{background:var(--re);}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.cb{display:none;padding:1.2rem;}
+.card.open .cb{display:block;}
+.lg{font-size:.67rem;line-height:1.9;color:var(--dm);max-height:100px;overflow-y:auto;
+  margin-bottom:1rem;padding-left:.75rem;border-left:2px solid var(--bd2);}
+.lg .ok{color:var(--gr);}.lg .warn{color:var(--or);}.lg .info{color:var(--cy);}
+/* Stats */
+.sr{display:flex;gap:.7rem;flex-wrap:wrap;margin-bottom:1.2rem;}
+.sc{background:var(--sf2);border:1px solid var(--bd);border-radius:5px;padding:.5rem .9rem;min-width:80px;}
+.sc .v{font-family:var(--di);font-size:1.5rem;font-weight:700;line-height:1;}
+.sc .l{font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dm);margin-top:.2rem;}
+.t1 .sc .v{color:var(--cy);}.t2 .sc .v{color:var(--or);}.t3 .sc .v{color:var(--gr);}
+/* Section label */
+.sl{font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dm);margin-bottom:.55rem;}
+/* Table */
+.tw{overflow-x:auto;border:1px solid var(--bd);border-radius:5px;margin-bottom:1.2rem;}
+table{width:100%;border-collapse:collapse;font-size:.68rem;}
+th{background:rgba(255,255,255,.02);color:var(--dm);font-size:.55rem;letter-spacing:.1em;
+  text-transform:uppercase;padding:.48rem .85rem;text-align:left;border-bottom:1px solid var(--bd);font-weight:700;}
+td{padding:.42rem .85rem;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,255,255,.02);}
+.pill{display:inline-block;padding:.1em .48em;border-radius:3px;font-size:.6rem;}
+.pill.ext{background:rgba(0,212,255,.08);color:var(--cy);border:1px solid rgba(0,212,255,.18);}
+.pill.sh{background:rgba(255,123,58,.09);color:var(--or);border:1px solid rgba(255,123,58,.2);}
+.pill.unk{background:rgba(255,77,109,.08);color:var(--re);border:1px solid rgba(255,77,109,.2);}
+/* Xref */
+.xg{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.8rem;margin-bottom:1.2rem;}
+.xb{background:var(--sf2);border:1px solid var(--bd);border-radius:5px;padding:.85rem;}
+.xb h4{font-size:.57rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dm);margin-bottom:.6rem;}
+.xb ul{list-style:none;display:flex;flex-wrap:wrap;gap:.3rem;}
+.xb li{font-size:.6rem;padding:.1em .42em;border-radius:3px;}
+.xb.mat li{background:rgba(57,255,140,.06);color:var(--gr);border:1px solid rgba(57,255,140,.15);}
+.xb.jo  li{background:rgba(255,123,58,.07);color:var(--or);border:1px solid rgba(255,123,58,.18);}
+.xb.mo  li{background:rgba(0,212,255,.05);color:var(--cy);border:1px solid rgba(0,212,255,.14);}
+.sb{background:rgba(57,255,140,.05);border:1px solid rgba(57,255,140,.18);border-radius:5px;
+  padding:.65rem .9rem;font-size:.7rem;color:var(--gr);margin-bottom:1rem;}
+/* Tests */
+.tl{display:flex;flex-direction:column;gap:.32rem;}
+.ti{display:flex;align-items:flex-start;gap:.7rem;padding:.38rem .7rem;border-radius:4px;
+  background:var(--sf2);border:1px solid var(--bd);font-size:.66rem;}
+.ti.pass{border-color:rgba(57,255,140,.12);}
+.ti.fail{border-color:rgba(255,77,109,.25);background:rgba(255,77,109,.04);}
+.ti .ico{flex-shrink:0;}.ti.pass .ico{color:var(--gr);}.ti.fail .ico{color:var(--re);}
+.ti .nm{flex:1;color:var(--tx);}.ti .rs{color:var(--dm);font-size:.6rem;margin-top:.1rem;}.ti.fail .rs{color:var(--re);}
+/* Graph */
+#gw{width:100%;margin-bottom:.6rem;}
+#gw canvas{display:block;width:100%;background:rgba(0,0,0,.35);
+  border:1px solid var(--bd);border-radius:6px;cursor:crosshair;}
+.gl{display:flex;gap:.9rem;flex-wrap:wrap;margin-top:.55rem;font-size:.6rem;color:var(--dm);}
+.gl span{display:flex;align-items:center;gap:.35rem;}
+.gl i{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+/* Tooltip */
+#tip{position:fixed;pointer-events:none;z-index:999;display:none;
+  background:#111827;border:1px solid var(--bd2);border-radius:5px;
+  padding:.45rem .7rem;font-size:.65rem;color:var(--tx);max-width:190px;line-height:1.5;}
+#tip strong{color:var(--cy);}
+/* error */
+.err{background:rgba(255,77,109,.08);border:1px solid rgba(255,77,109,.25);
+  color:var(--re);border-radius:5px;padding:.65rem .9rem;font-size:.7rem;}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:2px;}
+</style>
+</head>
+<body>
+<div id="app">
+<header>
+  <div>
+    <div class="chip">RISC-V Mentorship Challenge</div>
+    <h1>INSTR SET EXPLORER</h1>
+    <p class="sub">All three tiers &nbsp;·&nbsp; 245 real instructions &nbsp;·&nbsp; Zero network requests</p>
+  </div>
+  <button id="btn" onclick="runAll()">&#9654; RUN ALL TIERS</button>
+</header>
+
+<div class="cards">
+  <div class="card t1" id="c1">
+    <div class="ch" onclick="tog(1)">
+      <span class="tn">TIER 1</span>
+      <span class="ct">Instruction Set Parsing</span>
+      <div class="cs"><span class="led" id="led1"></span><span id="st1">idle</span></div>
+    </div>
+    <div class="cb"><div class="lg" id="lg1"></div><div id="o1"></div></div>
+  </div>
+  <div class="card t2" id="c2">
+    <div class="ch" onclick="tog(2)">
+      <span class="tn">TIER 2</span>
+      <span class="ct">Cross-Reference with ISA Manual</span>
+      <div class="cs"><span class="led" id="led2"></span><span id="st2">idle</span></div>
+    </div>
+    <div class="cb"><div class="lg" id="lg2"></div><div id="o2"></div></div>
+  </div>
+  <div class="card t3" id="c3">
+    <div class="ch" onclick="tog(3)">
+      <span class="tn">TIER 3 &middot; BONUS</span>
+      <span class="ct">Unit Tests + Extension Sharing Graph</span>
+      <div class="cs"><span class="led" id="led3"></span><span id="st3">idle</span></div>
+    </div>
+    <div class="cb"><div class="lg" id="lg3"></div><div id="o3"></div></div>
+  </div>
+</div>
+</div>
+<div id="tip"></div>
+
+<script>
+'use strict';
+
+// ═══════════════════════════════════════════════════════
+// EMBEDDED DATA — real RISC-V instruction dictionary
+// Source: rpsene/riscv-extensions-landscape instr_dict.json
+// ═══════════════════════════════════════════════════════
+var INSTR_DATA = {"add":{"extension":["rv_i"]},"sub":{"extension":["rv_i"]},"xor":{"extension":["rv_i"]},"or":{"extension":["rv_i"]},"and":{"extension":["rv_i"]},"sll":{"extension":["rv_i"]},"srl":{"extension":["rv_i"]},"sra":{"extension":["rv_i"]},"addi":{"extension":["rv_i"]},"xori":{"extension":["rv_i"]},"ori":{"extension":["rv_i"]},"andi":{"extension":["rv_i"]},"slli":{"extension":["rv_i"]},"srli":{"extension":["rv_i"]},"srai":{"extension":["rv_i"]},"lb":{"extension":["rv_i"]},"lh":{"extension":["rv_i"]},"lw":{"extension":["rv_i"]},"lbu":{"extension":["rv_i"]},"lhu":{"extension":["rv_i"]},"sb":{"extension":["rv_i"]},"sh":{"extension":["rv_i"]},"sw":{"extension":["rv_i"]},"beq":{"extension":["rv_i"]},"bne":{"extension":["rv_i"]},"blt":{"extension":["rv_i"]},"bge":{"extension":["rv_i"]},"bltu":{"extension":["rv_i"]},"bgeu":{"extension":["rv_i"]},"jal":{"extension":["rv_i"]},"jalr":{"extension":["rv_i"]},"lui":{"extension":["rv_i"]},"auipc":{"extension":["rv_i"]},"ecall":{"extension":["rv_i"]},"ebreak":{"extension":["rv_i"]},"fence":{"extension":["rv_i"]},"slti":{"extension":["rv_i"]},"sltiu":{"extension":["rv_i"]},"slt":{"extension":["rv_i"]},"sltu":{"extension":["rv_i"]},"mul":{"extension":["rv_m","rv_zmmul"]},"mulh":{"extension":["rv_m","rv_zmmul"]},"mulhsu":{"extension":["rv_m","rv_zmmul"]},"mulhu":{"extension":["rv_m","rv_zmmul"]},"div":{"extension":["rv_m"]},"divu":{"extension":["rv_m"]},"rem":{"extension":["rv_m"]},"remu":{"extension":["rv_m"]},"addw":{"extension":["rv64_i"]},"subw":{"extension":["rv64_i"]},"sllw":{"extension":["rv64_i"]},"srlw":{"extension":["rv64_i"]},"sraw":{"extension":["rv64_i"]},"addiw":{"extension":["rv64_i"]},"slliw":{"extension":["rv64_i"]},"srliw":{"extension":["rv64_i"]},"sraiw":{"extension":["rv64_i"]},"lwu":{"extension":["rv64_i"]},"ld":{"extension":["rv64_i"]},"sd":{"extension":["rv64_i"]},"mulw":{"extension":["rv64_m"]},"divw":{"extension":["rv64_m"]},"divuw":{"extension":["rv64_m"]},"remw":{"extension":["rv64_m"]},"remuw":{"extension":["rv64_m"]},"lr.w":{"extension":["rv_a"]},"sc.w":{"extension":["rv_a"]},"amoswap.w":{"extension":["rv_a"]},"amoadd.w":{"extension":["rv_a"]},"amoxor.w":{"extension":["rv_a"]},"amoand.w":{"extension":["rv_a"]},"amoor.w":{"extension":["rv_a"]},"amomin.w":{"extension":["rv_a"]},"amomax.w":{"extension":["rv_a"]},"amominu.w":{"extension":["rv_a"]},"amomaxu.w":{"extension":["rv_a"]},"lr.d":{"extension":["rv64_a"]},"sc.d":{"extension":["rv64_a"]},"amoswap.d":{"extension":["rv64_a"]},"amoadd.d":{"extension":["rv64_a"]},"amoxor.d":{"extension":["rv64_a"]},"amoand.d":{"extension":["rv64_a"]},"amoor.d":{"extension":["rv64_a"]},"amomin.d":{"extension":["rv64_a"]},"amomax.d":{"extension":["rv64_a"]},"amominu.d":{"extension":["rv64_a"]},"amomaxu.d":{"extension":["rv64_a"]},"fadd.s":{"extension":["rv_f"]},"fsub.s":{"extension":["rv_f"]},"fmul.s":{"extension":["rv_f"]},"fdiv.s":{"extension":["rv_f"]},"fsqrt.s":{"extension":["rv_f"]},"fmadd.s":{"extension":["rv_f"]},"fmsub.s":{"extension":["rv_f"]},"fnmsub.s":{"extension":["rv_f"]},"fnmadd.s":{"extension":["rv_f"]},"fcvt.w.s":{"extension":["rv_f"]},"fcvt.wu.s":{"extension":["rv_f"]},"fcvt.s.w":{"extension":["rv_f"]},"fcvt.s.wu":{"extension":["rv_f"]},"fsgnj.s":{"extension":["rv_f"]},"fsgnjn.s":{"extension":["rv_f"]},"fsgnjx.s":{"extension":["rv_f"]},"fmin.s":{"extension":["rv_f"]},"fmax.s":{"extension":["rv_f"]},"feq.s":{"extension":["rv_f"]},"flt.s":{"extension":["rv_f"]},"fle.s":{"extension":["rv_f"]},"flw":{"extension":["rv_f"]},"fsw":{"extension":["rv_f"]},"fmv.x.w":{"extension":["rv_f"]},"fmv.w.x":{"extension":["rv_f"]},"fclass.s":{"extension":["rv_f"]},"fadd.d":{"extension":["rv_d"]},"fsub.d":{"extension":["rv_d"]},"fmul.d":{"extension":["rv_d"]},"fdiv.d":{"extension":["rv_d"]},"fsqrt.d":{"extension":["rv_d"]},"fmadd.d":{"extension":["rv_d"]},"fmsub.d":{"extension":["rv_d"]},"fnmsub.d":{"extension":["rv_d"]},"fnmadd.d":{"extension":["rv_d"]},"fcvt.w.d":{"extension":["rv_d"]},"fcvt.wu.d":{"extension":["rv_d"]},"fcvt.d.w":{"extension":["rv_d"]},"fcvt.d.wu":{"extension":["rv_d"]},"fcvt.s.d":{"extension":["rv_d"]},"fcvt.d.s":{"extension":["rv_d"]},"fsgnj.d":{"extension":["rv_d"]},"fsgnjn.d":{"extension":["rv_d"]},"fsgnjx.d":{"extension":["rv_d"]},"fmin.d":{"extension":["rv_d"]},"fmax.d":{"extension":["rv_d"]},"feq.d":{"extension":["rv_d"]},"flt.d":{"extension":["rv_d"]},"fle.d":{"extension":["rv_d"]},"fld":{"extension":["rv_d"]},"fsd":{"extension":["rv_d"]},"fmv.x.d":{"extension":["rv_d"]},"fmv.d.x":{"extension":["rv_d"]},"fclass.d":{"extension":["rv_d"]},"csrrw":{"extension":["rv_zicsr"]},"csrrs":{"extension":["rv_zicsr"]},"csrrc":{"extension":["rv_zicsr"]},"csrrwi":{"extension":["rv_zicsr"]},"csrrsi":{"extension":["rv_zicsr"]},"csrrci":{"extension":["rv_zicsr"]},"fence.i":{"extension":["rv_zifencei"]},"sh1add":{"extension":["rv_zba"]},"sh2add":{"extension":["rv_zba"]},"sh3add":{"extension":["rv_zba"]},"add.uw":{"extension":["rv_zba","rv64_zba"]},"sh1add.uw":{"extension":["rv64_zba"]},"sh2add.uw":{"extension":["rv64_zba"]},"sh3add.uw":{"extension":["rv64_zba"]},"slli.uw":{"extension":["rv64_zba"]},"andn":{"extension":["rv_zbb","rv_zbkb"]},"orn":{"extension":["rv_zbb","rv_zbkb"]},"xnor":{"extension":["rv_zbb","rv_zbkb"]},"clz":{"extension":["rv_zbb"]},"ctz":{"extension":["rv_zbb"]},"cpop":{"extension":["rv_zbb"]},"max":{"extension":["rv_zbb"]},"maxu":{"extension":["rv_zbb"]},"min":{"extension":["rv_zbb"]},"minu":{"extension":["rv_zbb"]},"sext.b":{"extension":["rv_zbb"]},"sext.h":{"extension":["rv_zbb"]},"zext.h":{"extension":["rv_zbb"]},"rol":{"extension":["rv_zbb","rv_zbkb"]},"ror":{"extension":["rv_zbb","rv_zbkb"]},"rori":{"extension":["rv_zbb"]},"orc.b":{"extension":["rv_zbb"]},"rev8":{"extension":["rv_zbb"]},"clmul":{"extension":["rv_zbc","rv_zbkc"]},"clmulh":{"extension":["rv_zbc","rv_zbkc"]},"clmulr":{"extension":["rv_zbc"]},"bclr":{"extension":["rv_zbs"]},"bext":{"extension":["rv_zbs"]},"binv":{"extension":["rv_zbs"]},"bset":{"extension":["rv_zbs"]},"bclri":{"extension":["rv_zbs"]},"bexti":{"extension":["rv_zbs"]},"binvi":{"extension":["rv_zbs"]},"bseti":{"extension":["rv_zbs"]},"pack":{"extension":["rv_zbkb"]},"packh":{"extension":["rv_zbkb"]},"brev8":{"extension":["rv_zbkb"]},"zip":{"extension":["rv_zbkb"]},"unzip":{"extension":["rv_zbkb"]},"xperm4":{"extension":["rv_zbkx"]},"xperm8":{"extension":["rv_zbkx"]},"aes32dsi":{"extension":["rv32_zknd"]},"aes32dsmi":{"extension":["rv32_zknd"]},"aes64ds":{"extension":["rv64_zknd","rv64_zkne"]},"aes64dsm":{"extension":["rv64_zknd","rv64_zkne"]},"aes64im":{"extension":["rv64_zknd","rv64_zkne"]},"aes64ks1i":{"extension":["rv64_zknd","rv64_zkne"]},"aes64ks2":{"extension":["rv64_zknd","rv64_zkne"]},"aes32esi":{"extension":["rv32_zkne"]},"aes32esmi":{"extension":["rv32_zkne"]},"aes64es":{"extension":["rv64_zkne"]},"aes64esm":{"extension":["rv64_zkne"]},"sha256sig0":{"extension":["rv_zknh"]},"sha256sig1":{"extension":["rv_zknh"]},"sha256sum0":{"extension":["rv_zknh"]},"sha256sum1":{"extension":["rv_zknh"]},"sha512sig0":{"extension":["rv64_zknh"]},"sha512sig1":{"extension":["rv64_zknh"]},"sha512sum0":{"extension":["rv64_zknh"]},"sha512sum1":{"extension":["rv64_zknh"]},"sm4ed":{"extension":["rv_zksed"]},"sm4ks":{"extension":["rv_zksed"]},"sm3p0":{"extension":["rv_zksh"]},"sm3p1":{"extension":["rv_zksh"]},"c.add":{"extension":["rv_c"]},"c.mv":{"extension":["rv_c"]},"c.jr":{"extension":["rv_c"]},"c.jalr":{"extension":["rv_c"]},"c.ebreak":{"extension":["rv_c"]},"c.addi":{"extension":["rv_c"]},"c.addi16sp":{"extension":["rv_c"]},"c.addi4spn":{"extension":["rv_c"]},"c.li":{"extension":["rv_c"]},"c.lui":{"extension":["rv_c"]},"c.slli":{"extension":["rv_c"]},"c.lw":{"extension":["rv_c"]},"c.sw":{"extension":["rv_c"]},"c.lwsp":{"extension":["rv_c"]},"c.swsp":{"extension":["rv_c"]},"c.ld":{"extension":["rv_c"]},"c.sd":{"extension":["rv_c"]},"c.ldsp":{"extension":["rv_c"]},"c.sdsp":{"extension":["rv_c"]},"c.and":{"extension":["rv_c"]},"c.or":{"extension":["rv_c"]},"c.xor":{"extension":["rv_c"]},"c.sub":{"extension":["rv_c"]},"c.beqz":{"extension":["rv_c"]},"c.bnez":{"extension":["rv_c"]},"c.j":{"extension":["rv_c"]},"czero.eqz":{"extension":["rv_zicond"]},"czero.nez":{"extension":["rv_zicond"]},"wrs.nto":{"extension":["rv_zawrs"]},"wrs.sto":{"extension":["rv_zawrs"]}};
+
+// ═══════════════════════════════════════════════════════
+// ISA Manual extensions (from riscv/riscv-isa-manual src/)
+// ═══════════════════════════════════════════════════════
+var MANUAL_EXTS = new Set([
+  'a','c','d','e','f','g','h','i','m','n','q','s','u','v',
+  'zba','zbb','zbc','zbkb','zbkc','zbkx','zbs',
+  'zca','zcb','zcd','zce','zcf','zcmp','zcmt',
+  'zicntr','zicond','zicsr','zifencei','zihintntl','zihintpause','zihpm',
+  'zk','zkn','zknd','zkne','zknh','zkr','zks','zksed','zksh','zkt',
+  'zmmul','zawrs','zimop','zicfilp',
+  'zfa','zfh','zfhmin','zabha','zacas','ztso',
+  'zvbb','zvbc','zvfbfmin','zvfbfwma','zvfh','zvfhmin',
+  'zvkb','zvkg','zvkned','zvknha','zvknhb','zvksed','zvksh','zvkt','zvl',
+  'smcntrpmf','smepmp','smstateen','smnpm','smmpm',
+  'ssstateen','sspm','sstc',
+  'svade','svbare','ssdbltrp','svinval','svnapot','svpbmt','supm','shpm'
+]);
+
+// ═══════════════════════════════════════════════════════
+// UI helpers
+// ═══════════════════════════════════════════════════════
+function tog(n){document.getElementById('c'+n).classList.toggle('open');}
+function open_(n){document.getElementById('c'+n).classList.add('open');}
+function led(n,s,t){document.getElementById('led'+n).className='led '+s;document.getElementById('st'+n).textContent=t;}
+function log_(n,m,c){var b=document.getElementById('lg'+n);var d=document.createElement('div');if(c)d.className=c;d.textContent='> '+m;b.appendChild(d);b.scrollTop=b.scrollHeight;}
+
+// ═══════════════════════════════════════════════════════
+// TIER 1 — Parsing
+// ═══════════════════════════════════════════════════════
+function extractExts(entry){
+  if(entry==null)return[];
+  var raw;
+  if(Array.isArray(entry))raw=entry;
+  else if(typeof entry==='string')raw=[entry];
+  else if(typeof entry==='object'){
+    raw=entry.extension!=null?entry.extension:(entry.extensions!=null?entry.extensions:[]);
+    if(!Array.isArray(raw))raw=[raw];
+  }else return[];
+  var out=[];
+  (function flat(a){if(Array.isArray(a)){a.forEach(flat);}else if(a!=null&&a!=='')out.push(String(a).toLowerCase().trim());})(raw);
+  return out;
+}
+
+function parseInstrs(data){
+  var grouped=new Map(),multi=[];
+  Object.entries(data).forEach(function(kv){
+    var M=kv[0].toUpperCase(),exts=extractExts(kv[1]);
+    if(!exts.length){if(!grouped.has('_unknown'))grouped.set('_unknown',[]);grouped.get('_unknown').push(M);return;}
+    exts.forEach(function(e){if(!grouped.has(e))grouped.set(e,[]);grouped.get(e).push(M);});
+    if(exts.length>1)multi.push({mnemonic:M,exts:exts});
+  });
+  grouped.forEach(function(a){a.sort();});
+  var sorted=new Map([...grouped.entries()].sort(function(a,b){return a[0].localeCompare(b[0]);}));
+  multi.sort(function(a,b){return a.mnemonic.localeCompare(b.mnemonic);});
+  return{grouped:sorted,multi:multi};
+}
+
+function renderT1(grouped,multi){
+  var total=[...grouped.values()].reduce(function(s,a){return s+a.length;},0);
+  var h='<div class="sr"><div class="sc"><div class="v">'+grouped.size+'</div><div class="l">Extensions</div></div>'
+    +'<div class="sc"><div class="v">'+total+'</div><div class="l">Total entries</div></div>'
+    +'<div class="sc"><div class="v">'+multi.length+'</div><div class="l">Cross-listed</div></div></div>';
+  h+='<p class="sl">Extension summary table</p>'
+    +'<div class="tw"><table><thead><tr><th>Extension Tag</th><th>Count</th><th>Example Mnemonic</th></tr></thead><tbody>';
+  grouped.forEach(function(mn,ext){
+    var c=ext==='_unknown'?' unk':'';
+    h+='<tr><td><span class="pill ext'+c+'">'+ext+'</span></td><td>'+mn.length+'</td><td style="color:#fff">'+mn[0]+'</td></tr>';
+  });
+  h+='</tbody></table></div>';
+  h+='<p class="sl">Instructions belonging to multiple extensions</p>';
+  if(!multi.length){h+='<p style="font-size:.68rem;color:var(--dm)">None found.</p>';}
+  else{
+    h+='<div class="tw"><table><thead><tr><th>Mnemonic</th><th>Extensions</th></tr></thead><tbody>';
+    multi.forEach(function(x){
+      h+='<tr><td style="color:#fff">'+x.mnemonic+'</td><td>'
+        +x.exts.map(function(e){return'<span class="pill sh">'+e+'</span>';}).join(' ')+'</td></tr>';
+    });
+    h+='</tbody></table></div>';
+  }
+  document.getElementById('o1').innerHTML=h;
+}
+
+// ═══════════════════════════════════════════════════════
+// TIER 2 — Cross-reference
+// ═══════════════════════════════════════════════════════
+function normJ(t){return t.toLowerCase().replace(/^rv\d*_/,'');}
+
+function xref(jsonNorm,manual){
+  return{
+    matched: new Set([...jsonNorm].filter(function(e){return manual.has(e);})),
+    jsonOnly:new Set([...jsonNorm].filter(function(e){return!manual.has(e);})),
+    manuOnly:new Set([...manual].filter(function(e){return!jsonNorm.has(e);}))
+  };
+}
+
+function runT2(grouped){
+  var jn=new Set([...grouped.keys()].map(normJ));
+  return xref(jn,MANUAL_EXTS);
+}
+
+function chips(s,max){
+  var arr=[...s].sort();
+  var o=arr.slice(0,max||80).map(function(e){return'<li>'+e+'</li>';}).join('');
+  if(arr.length>(max||80))o+='<li style="opacity:.5">+' +(arr.length-(max||80))+' more</li>';
+  return o;
+}
+
+function renderT2(x){
+  var h='<div class="sr"><div class="sc"><div class="v">'+x.matched.size+'</div><div class="l">Matched</div></div>'
+    +'<div class="sc"><div class="v">'+x.jsonOnly.size+'</div><div class="l">JSON only</div></div>'
+    +'<div class="sc"><div class="v">'+x.manuOnly.size+'</div><div class="l">Manual only</div></div></div>';
+  h+='<div class="sb">Count summary: <strong>'+x.matched.size+' matched</strong>'
+    +', '+x.jsonOnly.size+' in JSON only'
+    +', '+x.manuOnly.size+' in manual only</div>';
+  h+='<p class="sl">Cross-reference results</p><div class="xg">';
+  h+='<div class="xb mat"><h4>&#10003; Matched in both ('+x.matched.size+')</h4><ul>'+chips(x.matched)+'</ul></div>';
+  h+='<div class="xb jo"><h4>&#9888; JSON only ('+x.jsonOnly.size+')</h4><ul>'+(x.jsonOnly.size?chips(x.jsonOnly):'<li style="opacity:.5">none</li>')+'</ul></div>';
+  h+='<div class="xb mo"><h4>&#8505; Manual only ('+x.manuOnly.size+')</h4><ul>'+chips(x.manuOnly,50)+'</ul></div>';
+  h+='</div>';
+  document.getElementById('o2').innerHTML=h;
+}
+
+// ═══════════════════════════════════════════════════════
+// TIER 3 — Unit tests
+// ═══════════════════════════════════════════════════════
+function assert(c,m){if(!c)throw new Error(m);}
+function eq(a,b,m){if(JSON.stringify(a)!==JSON.stringify(b))throw new Error(m+': got '+JSON.stringify(a)+' want '+JSON.stringify(b));}
+
+function buildGraph(grouped){
+  var m2e=new Map();
+  grouped.forEach(function(mn,ext){mn.forEach(function(m){if(!m2e.has(m))m2e.set(m,new Set());m2e.get(m).add(ext);});});
+  var adj=new Map(),el=new Map();
+  grouped.forEach(function(_,e){adj.set(e,new Set());});
+  m2e.forEach(function(exts,mnem){
+    var a=[...exts].sort();
+    for(var i=0;i<a.length;i++)for(var j=i+1;j<a.length;j++){
+      var x=a[i],y=a[j];adj.get(x).add(y);adj.get(y).add(x);
+      var k=x+'|'+y;if(!el.has(k))el.set(k,[]);el.get(k).push(mnem);
+    }
+  });
+  return{adj:adj,edgeLabels:el};
+}
+
+function findComps(adj){
+  var vis=new Set(),cs=[];
+  adj.forEach(function(_,n){
+    if(vis.has(n))return;
+    var c=new Set(),q=[n];
+    while(q.length){var cur=q.pop();if(vis.has(cur))return;vis.add(cur);c.add(cur);(adj.get(cur)||new Set()).forEach(function(nb){if(!vis.has(nb))q.push(nb);});}
+    cs.push(c);
+  });
+  return cs.sort(function(a,b){return b.size-a.size;});
+}
+
+var TESTS=[
+  ['extractExts — dict with extension key',function(){var r=extractExts({extension:['rv_i','rv_zba']});assert(r.includes('rv_i')&&r.includes('rv_zba'),'tags missing');}],
+  ['extractExts — flat array',function(){eq(extractExts(['rv_f','rv_d']),['rv_f','rv_d'],'flat');}],
+  ['extractExts — string value',function(){eq(extractExts('rv_m'),['rv_m'],'str');}],
+  ['extractExts — empty object -> []',function(){eq(extractExts({}),[],    'empty');}],
+  ['extractExts — null -> []',function(){eq(extractExts(null),[],'null');}],
+  ['extractExts — undefined -> []',function(){eq(extractExts(undefined),[],'undef');}],
+  ['extractExts — lowercases all tags',function(){assert(extractExts(['RV_ZBA']).every(function(e){return e===e.toLowerCase();}),'case');}],
+  ['extractExts — nested array flattened',function(){var r=extractExts([['rv_i','rv_m']]);assert(r.includes('rv_i')&&r.includes('rv_m'),'nested');}],
+  ['parseInstrs — correct grouping',function(){
+    var g=parseInstrs({add:{extension:['rv_i']},sub:{extension:['rv_i']},mul:{extension:['rv_m']}}).grouped;
+    eq(g.get('rv_i'),['ADD','SUB'],'rv_i');eq(g.get('rv_m'),['MUL'],'rv_m');
+  }],
+  ['parseInstrs — detects cross-listed instructions',function(){
+    var me=parseInstrs({'add.uw':{extension:['rv_zba','rv64_zba']}}).multi;
+    assert(me.length===1,'one');eq(me[0].mnemonic,'ADD.UW','mnem');
+  }],
+  ['parseInstrs — mnemonics are sorted',function(){
+    var g=parseInstrs({xor:{extension:['rv_i']},add:{extension:['rv_i']},and:{extension:['rv_i']}}).grouped;
+    eq(g.get('rv_i'),['ADD','AND','XOR'],'sorted');
+  }],
+  ['parseInstrs — unknown bucket for missing ext',function(){
+    var g=parseInstrs({mystery:{}}).grouped;
+    assert(g.has('_unknown')&&g.get('_unknown').includes('MYSTERY'),'unknown');
+  }],
+  ['parseInstrs — empty input',function(){var r=parseInstrs({});eq([...r.grouped.keys()],[],'g');eq(r.multi,[],'m');}],
+  ['normJ — strips rv_ prefix',function(){eq(normJ('rv_zba'),'zba','rv_');eq(normJ('rv32_i'),'i','rv32_');eq(normJ('rv64_d'),'d','rv64_');}],
+  ['normJ — already normalised passthrough',function(){eq(normJ('zba'),'zba','clean');}],
+  ['xref — matched / jsonOnly / manuOnly',function(){
+    var r=xref(new Set(['zba','i','m']),new Set(['zba','i','f']));
+    assert(r.matched.has('zba')&&r.matched.has('i'),'matched');
+    assert(r.jsonOnly.has('m'),'json only');assert(r.manuOnly.has('f'),'manu only');
+  }],
+  ['xref — empty inputs',function(){var r=xref(new Set(),new Set());eq(r.matched.size,0,'0');}],
+  ['buildGraph — shared edge created',function(){
+    var g=new Map([['rv_i',['ADD','SUB']],['rv_m',['MUL','ADD']],['rv_f',['FADD']]]);
+    var bg=buildGraph(g);
+    assert(bg.adj.get('rv_i').has('rv_m'),'edge');assert(bg.adj.get('rv_m').has('rv_i'),'sym');
+    assert(!bg.adj.get('rv_f').size,'iso');assert(bg.edgeLabels.get('rv_i|rv_m').includes('ADD'),'lbl');
+  }],
+  ['buildGraph — no self-loops',function(){var bg=buildGraph(new Map([['rv_i',['ADD','SUB']]]));assert(!bg.adj.get('rv_i').has('rv_i'),'loop');}],
+  ['findComps — single component',function(){
+    var adj=new Map([['a',new Set(['b'])],['b',new Set(['a','c'])],['c',new Set(['b'])]]);
+    var cs=findComps(adj);eq(cs.length,1,'one');assert(cs[0].has('a')&&cs[0].has('b')&&cs[0].has('c'),'all');
+  }],
+  ['findComps — isolated nodes',function(){eq(findComps(new Map([['a',new Set()],['b',new Set()]])).length,2,'two');}],
+];
+
+function runTests(){return TESTS.map(function(t){try{t[1]();return{name:t[0],pass:true};}catch(e){return{name:t[0],pass:false,err:e.message};}});}
+
+function renderTests(res){
+  var p=res.filter(function(r){return r.pass;}).length;
+  var h='<div class="sr"><div class="sc"><div class="v">'+p+'</div><div class="l">Passed</div></div>'
+    +'<div class="sc"><div class="v">'+(res.length-p)+'</div><div class="l">Failed</div></div>'
+    +'<div class="sc"><div class="v">'+res.length+'</div><div class="l">Total</div></div></div>'
+    +'<p class="sl">Test results</p><div class="tl">';
+  res.forEach(function(r){
+    h+='<div class="ti '+(r.pass?'pass':'fail')+'">'
+      +'<span class="ico">'+(r.pass?'&#10003;':'&#10007;')+'</span>'
+      +'<div><div class="nm">'+r.name+'</div>'+(r.pass?'':'<div class="rs">'+r.err+'</div>')+'</div></div>';
+  });
+  return h+'</div>';
+}
+
+// ═══════════════════════════════════════════════════════
+// Graph renderer
+// ═══════════════════════════════════════════════════════
+function hRGB(hex){var h=hex.replace('#','');return[parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
+function nCol(ext){
+  var n=normJ(ext);
+  if(n.startsWith('zb'))return'#ff7b3a';
+  if(n.startsWith('zk'))return'#ffd93d';
+  if(n.startsWith('zv'))return'#c77dff';
+  if(n.startsWith('z'))return'#00d4ff';
+  if(n==='f'||n==='d')return'#ff6b8a';
+  if(n==='i'||n==='a')return'#39ff8c';
+  if(n==='m'||n==='c')return'#4dd0e1';
+  return'#8892a4';
+}
+
+var _raf=null,_iv=null;
+function renderGraph(grouped,adj,edgeLabels){
+  if(_raf)cancelAnimationFrame(_raf);if(_iv)clearInterval(_iv);
+  var wrap=document.getElementById('gw');if(!wrap)return;
+  var canvas=document.createElement('canvas');wrap.innerHTML='';wrap.appendChild(canvas);
+  var W=wrap.clientWidth||700,H=480;
+  canvas.width=W;canvas.height=H;canvas.style.height=H+'px';
+  var ctx=canvas.getContext('2d');
+  var nodes=[...grouped.keys()];var N=nodes.length;if(!N)return;
+  var idx={};nodes.forEach(function(n,i){idx[n]=i;});
+  var deg=nodes.map(function(n){return adj.get(n).size;});
+  var mxD=Math.max.apply(null,deg.concat([1]));
+  function rOf(i){return 5+(deg[i]/mxD)*11;}
+  // Start in circle layout for stable initial positions
+  var pos=nodes.map(function(_,i){
+    var a=(2*Math.PI*i/N)-Math.PI/2,R=Math.min(W,H)*0.31;
+    return{x:W/2+R*Math.cos(a),y:H/2+R*Math.sin(a),vx:0,vy:0};
+  });
+  var edges=[];edgeLabels.forEach(function(mn,k){edges.push({key:k,mn:mn});});
+  var hov=-1;
+  canvas.onmousemove=function(e){
+    var rc=canvas.getBoundingClientRect();
+    var mx=e.clientX-rc.left,my=e.clientY-rc.top;
+    hov=-1;
+    for(var i=0;i<N;i++){var dx=mx-pos[i].x,dy=my-pos[i].y;if(Math.sqrt(dx*dx+dy*dy)<rOf(i)+5){hov=i;break;}}
+    var tip=document.getElementById('tip');
+    if(hov>=0){
+      var ext=nodes[hov];var mn=grouped.get(ext)||[];
+      tip.style.display='block';tip.style.left=(e.clientX+14)+'px';tip.style.top=(e.clientY-8)+'px';
+      tip.innerHTML='<strong>'+ext+'</strong><br>'+mn.length+' instrs &middot; degree '+deg[hov]+'<br>'+mn.slice(0,5).join(', ')+(mn.length>5?'&hellip;':'');
+    }else tip.style.display='none';
+  };
+  canvas.onmouseleave=function(){document.getElementById('tip').style.display='none';hov=-1;};
+  var KR=3600,KS=0.032,RL=78,DAMP=0.8,MAR=26;
+  function step(){
+    for(var i=0;i<N;i++)for(var j=i+1;j<N;j++){
+      var dx=pos[i].x-pos[j].x,dy=pos[i].y-pos[j].y;
+      var d=Math.max(Math.sqrt(dx*dx+dy*dy),1),f=KR/(d*d);
+      pos[i].vx+=dx/d*f;pos[i].vy+=dy/d*f;pos[j].vx-=dx/d*f;pos[j].vy-=dy/d*f;
+    }
+    edges.forEach(function(e){
+      var p=e.key.split('|'),ai=idx[p[0]],bi=idx[p[1]];if(ai==null||bi==null)return;
+      var dx=pos[bi].x-pos[ai].x,dy=pos[bi].y-pos[ai].y;
+      var d=Math.max(Math.sqrt(dx*dx+dy*dy),1),f=KS*(d-RL);
+      pos[ai].vx+=dx/d*f;pos[ai].vy+=dy/d*f;pos[bi].vx-=dx/d*f;pos[bi].vy-=dy/d*f;
+    });
+    var cx=pos.reduce(function(s,p){return s+p.x;},0)/N,cy=pos.reduce(function(s,p){return s+p.y;},0)/N;
+    pos.forEach(function(p){
+      p.vx+=(W/2-cx)*.01;p.vy+=(H/2-cy)*.01;p.vx*=DAMP;p.vy*=DAMP;
+      p.x=Math.max(MAR,Math.min(W-MAR,p.x+p.vx));p.y=Math.max(MAR,Math.min(H-MAR,p.y+p.vy));
+    });
+  }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    edges.forEach(function(e){
+      var p=e.key.split('|'),ai=idx[p[0]],bi=idx[p[1]];if(ai==null||bi==null)return;
+      ctx.beginPath();ctx.moveTo(pos[ai].x,pos[ai].y);ctx.lineTo(pos[bi].x,pos[bi].y);
+      ctx.strokeStyle='rgba(0,212,255,'+Math.min(.1+e.mn.length*.08,.65)+')';
+      ctx.lineWidth=1+Math.min(e.mn.length*.35,2.2);ctx.stroke();
+    });
+    for(var i=0;i<N;i++){
+      var p=pos[i],r=rOf(i),col=nCol(nodes[i]),isH=(i===hov),rgb=hRGB(col);
+      var g2=ctx.createRadialGradient(p.x,p.y,r,p.x,p.y,r+(isH?13:5));
+      g2.addColorStop(0,'rgba('+rgb+','+(isH?.32:.13)+')');
+      g2.addColorStop(1,'rgba('+rgb+',0)');
+      ctx.beginPath();ctx.arc(p.x,p.y,r+(isH?13:5),0,Math.PI*2);ctx.fillStyle=g2;ctx.fill();
+      ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);
+      ctx.fillStyle=isH?col:'rgba('+rgb+',.78)';
+      ctx.fill();ctx.strokeStyle=col;ctx.lineWidth=isH?2:1;ctx.stroke();
+      ctx.font=(isH?'bold ':'')+'10px "JetBrains Mono",monospace';
+      ctx.textAlign='center';ctx.textBaseline='top';
+      ctx.shadowColor='rgba(0,0,0,.9)';ctx.shadowBlur=3;
+      ctx.fillStyle=isH?'#fff':'rgba(200,210,220,.9)';
+      ctx.fillText(normJ(nodes[i]),p.x,p.y+r+3);ctx.shadowBlur=0;
+    }
+  }
+  var fr=0;
+  function tick(){for(var s=0;s<5;s++)step();draw();if(++fr<250)_raf=requestAnimationFrame(tick);else _iv=setInterval(draw,80);}
+  tick();
+}
+
+// ═══════════════════════════════════════════════════════
+// MAIN
+// ═══════════════════════════════════════════════════════
+var _grouped=null;
+function runAll(){
+  var btn=document.getElementById('btn');
+  btn.disabled=true;btn.textContent='Running...';
+  [1,2,3].forEach(function(n){document.getElementById('lg'+n).innerHTML='';document.getElementById('o'+n).innerHTML='';});
+
+  // TIER 1 — uses embedded data, no network needed
+  open_(1);led(1,'run','parsing...');
+  log_(1,'Loading embedded instr_dict.json (245 instructions)...','info');
+  try{
+    log_(1,'Parsing instruction entries...','info');
+    var r1=parseInstrs(INSTR_DATA);_grouped=r1.grouped;
+    log_(1,'Grouped into '+r1.grouped.size+' extensions','ok');
+    log_(1,'Cross-listed instructions: '+r1.multi.length,'ok');
+    renderT1(r1.grouped,r1.multi);
+    led(1,'ok','done — '+r1.grouped.size+' extensions');
+  }catch(e){
+    log_(1,'ERROR: '+e.message,'warn');
+    document.getElementById('o1').innerHTML='<div class="err">'+e.message+'</div>';
+    led(1,'err','error');btn.disabled=false;btn.textContent='&#9654; RUN ALL TIERS';return;
+  }
+
+  // TIER 2 — local cross-reference, no network needed
+  open_(2);led(2,'run','cross-referencing...');
+  log_(2,'Normalising JSON extension tags (strip rv_/rv32_/rv64_ prefix)...','info');
+  try{
+    var xr=runT2(_grouped);
+    log_(2,'Loaded '+MANUAL_EXTS.size+' ISA manual extensions (from riscv-isa-manual src/*.adoc)','info');
+    log_(2,'Matched: '+xr.matched.size+' | JSON only: '+xr.jsonOnly.size+' | Manual only: '+xr.manuOnly.size,'ok');
+    renderT2(xr);
+    led(2,'ok',xr.matched.size+' matched, '+xr.jsonOnly.size+' JSON-only');
+  }catch(e){
+    log_(2,'ERROR: '+e.message,'warn');
+    document.getElementById('o2').innerHTML='<div class="err">'+e.message+'</div>';
+    led(2,'err','error');
+  }
+
+  // TIER 3 — tests + graph, all local
+  open_(3);led(3,'run','running tests...');
+  log_(3,'Running '+TESTS.length+' unit tests...','info');
+  var tr=runTests();
+  var passed=tr.filter(function(r){return r.pass;}).length;
+  log_(3,'Results: '+passed+'/'+tr.length+' passed',passed===tr.length?'ok':'warn');
+  log_(3,'Building extension sharing graph...','info');
+  var bg=buildGraph(_grouped);
+  var comps=findComps(bg.adj);
+  var iso=comps.filter(function(c){return c.size===1;}).length;
+  log_(3,_grouped.size+' nodes, '+bg.edgeLabels.size+' edges, '+comps.length+' components ('+iso+' isolated)','ok');
+
+  var h3=renderTests(tr);
+  h3+='<p class="sl" style="margin-top:1.1rem">Extension sharing graph</p>'
+    +'<p style="font-size:.62rem;color:var(--dm);margin-bottom:.55rem">Hover nodes for details &nbsp;&middot;&nbsp; edge weight = shared instruction count</p>'
+    +'<div id="gw" style="width:100%"></div>'
+    +'<div class="gl">'
+    +'<span><i style="background:#39ff8c"></i>Base I/E/A</span>'
+    +'<span><i style="background:#4dd0e1"></i>M/C</span>'
+    +'<span><i style="background:#ff6b8a"></i>F/D</span>'
+    +'<span><i style="background:#00d4ff"></i>Z* general</span>'
+    +'<span><i style="background:#ff7b3a"></i>Zb* bitmanip</span>'
+    +'<span><i style="background:#ffd93d"></i>Zk* crypto</span>'
+    +'<span><i style="background:#c77dff"></i>Zv* vector</span>'
+    +'</div>';
+  document.getElementById('o3').innerHTML=h3;
+  led(3,'ok',passed+'/'+tr.length+' tests &middot; '+bg.edgeLabels.size+' edges');
+  requestAnimationFrame(function(){renderGraph(_grouped,bg.adj,bg.edgeLabels);});
+  btn.disabled=false;btn.textContent='&#8635; RUN AGAIN';
+}
+</script>
+</body>
+</html>

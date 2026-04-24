@@ -1,0 +1,127 @@
+==============================================================
+  RISC-V Instruction Set Explorer — Sample Output
+==============================================================
+
+──────────────────────────────────────────────────────────────
+  TIER 1 — Instruction Set Parsing
+──────────────────────────────────────────────────────────────
+  Source: rpsene/riscv-extensions-landscape — instr_dict.json
+  Loaded 245 instruction entries.
+
+  EXTENSION TAG  |  COUNT  |  EXAMPLE MNEMONIC
+  ────────────────────────────────────────────
+  rv32_zknd    |      2  |  e.g. AES32DSI
+  rv32_zkne    |      2  |  e.g. AES32ESI
+  rv64_a       |     11  |  e.g. AMOADD.D
+  rv64_i       |     12  |  e.g. ADDIW
+  rv64_m       |      5  |  e.g. DIVUW
+  rv64_zba     |      5  |  e.g. ADD.UW
+  rv64_zknd    |      5  |  e.g. AES64DS
+  rv64_zkne    |      7  |  e.g. AES64DS
+  rv64_zknh    |      4  |  e.g. SHA512SIG0
+  rv_a         |     11  |  e.g. AMOADD.W
+  rv_c         |     26  |  e.g. C.ADD
+  rv_d         |     28  |  e.g. FADD.D
+  rv_f         |     26  |  e.g. FADD.S
+  rv_i         |     40  |  e.g. ADD
+  rv_m         |      8  |  e.g. DIV
+  rv_zawrs     |      2  |  e.g. WRS.NTO
+  rv_zba       |      4  |  e.g. ADD.UW
+  rv_zbb       |     18  |  e.g. ANDN
+  rv_zbc       |      3  |  e.g. CLMUL
+  rv_zbkb      |     10  |  e.g. ANDN
+  rv_zbkc      |      2  |  e.g. CLMUL
+  rv_zbkx      |      2  |  e.g. XPERM4
+  rv_zbs       |      8  |  e.g. BCLR
+  rv_zicond    |      2  |  e.g. CZERO.EQZ
+  rv_zicsr     |      6  |  e.g. CSRRC
+  rv_zifencei  |      1  |  e.g. FENCE.I
+  rv_zknh      |      4  |  e.g. SHA256SIG0
+  rv_zksed     |      2  |  e.g. SM4ED
+  rv_zksh      |      2  |  e.g. SM3P0
+  rv_zmmul     |      4  |  e.g. MUL
+  ────────────────────────────────────────────
+  TOTAL        |    262  |
+
+  Instructions in multiple extensions (17):
+  ──────────────────────────────────────────────────
+  ADD.UW                →  rv_zba, rv64_zba
+  AES64DS               →  rv64_zknd, rv64_zkne
+  AES64DSM              →  rv64_zknd, rv64_zkne
+  AES64IM               →  rv64_zknd, rv64_zkne
+  AES64KS1I             →  rv64_zknd, rv64_zkne
+  AES64KS2              →  rv64_zknd, rv64_zkne
+  ANDN                  →  rv_zbb, rv_zbkb
+  CLMUL                 →  rv_zbc, rv_zbkc
+  CLMULH                →  rv_zbc, rv_zbkc
+  MUL                   →  rv_m, rv_zmmul
+  MULH                  →  rv_m, rv_zmmul
+  MULHSU                →  rv_m, rv_zmmul
+  MULHU                 →  rv_m, rv_zmmul
+  ORN                   →  rv_zbb, rv_zbkb
+  ROL                   →  rv_zbb, rv_zbkb
+  ROR                   →  rv_zbb, rv_zbkb
+  XNOR                  →  rv_zbb, rv_zbkb
+
+──────────────────────────────────────────────────────────────
+  TIER 2 — Cross-Reference with ISA Manual
+──────────────────────────────────────────────────────────────
+  Scanned riscv-isa-manual src/*.adoc — 86 extensions identified
+
+  Count summary: 23 matched, 0 in JSON only, 63 in manual only
+
+  Matched in both (23):
+    rv_a                       ↔  a
+    rv_c                       ↔  c
+    rv_d                       ↔  d
+    rv_f                       ↔  f
+    rv_i                       ↔  i
+    rv_m                       ↔  m
+    rv_zawrs                   ↔  zawrs
+    rv_zba                     ↔  zba
+    rv_zbb                     ↔  zbb
+    rv_zbc                     ↔  zbc
+    rv_zbkb                    ↔  zbkb
+    rv_zbkc                    ↔  zbkc
+    rv_zbkx                    ↔  zbkx
+    rv_zbs                     ↔  zbs
+    rv_zicond                  ↔  zicond
+    rv_zicsr                   ↔  zicsr
+    rv_zifencei                ↔  zifencei
+    rv64_zknd                  ↔  zknd
+    rv64_zkne                  ↔  zkne
+    rv_zknh                    ↔  zknh
+    rv_zksed                   ↔  zksed
+    rv_zksh                    ↔  zksh
+    rv_zmmul                   ↔  zmmul
+
+  Manual only (63, first 20):  e, g, h, n, q, s, shpm, smcntrpmf, smepmp, smmpm, smnpm, smstateen, ssdbltrp, sspm, ssstateen, sstc, supm, svade, svbare, svinval, ...
+
+──────────────────────────────────────────────────────────────
+  TIER 3 — Extension Sharing Graph
+──────────────────────────────────────────────────────────────
+  Nodes: 30  |  Edges: 5  |  Isolated: 20
+
+  Extension Sharing Edges (by shared instruction count):
+  ──────────────────────────────────────────────────────
+  rv64_zknd               ──[5]──  rv64_zkne
+    shared: AES64DS, AES64DSM, AES64IM, AES64KS1I, AES64KS2
+  rv_zbb                  ──[5]──  rv_zbkb
+    shared: ANDN, ORN, ROL, ROR, XNOR
+  rv_m                    ──[4]──  rv_zmmul
+    shared: MUL, MULH, MULHSU, MULHU
+  rv_zbc                  ──[2]──  rv_zbkc
+    shared: CLMUL, CLMULH
+  rv64_zba                ──[1]──  rv_zba
+    shared: ADD.UW
+
+  Isolated (no shared instructions): 20 extensions
+  rv32_zknd, rv32_zkne, rv64_a, rv64_i, rv64_m, rv64_zknh, rv_a, rv_c, rv_d, rv_f, rv_i, rv_zawrs, rv_zbkx, rv_zbs, rv_zicond, rv_zicsr, rv_zifencei, rv_zknh, rv_zksed, rv_zksh
+
+==============================================================
+  TIER 3 — Unit Tests
+==============================================================
+  38 tests  |  0 failures  |  0 errors
+  Run:  python -m unittest tests/test_explorer.py -v
+
+==============================================================
