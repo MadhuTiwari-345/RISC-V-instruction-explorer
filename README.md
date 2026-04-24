@@ -9,7 +9,7 @@
 # 🚀 RISC-V Instruction Set Explorer
 
 <p align="center">
-  <b>Deep Dive into RISC-V ISA — Parsing • Validation • Visualization</b>
+ <b>Parse • Validate • Visualize the RISC-V Instruction Ecosystem</b>
 </p>
 
 <p align="center">
@@ -19,17 +19,6 @@
   <img src="https://img.shields.io/badge/Status-Complete-brightgreen?style=for-the-badge"/>
   <img src="https://img.shields.io/badge/License-MIT-lightgrey?style=for-the-badge"/>
 </p>
-
----
-
-## 🎯 Overview
-
-A **complete 3-tier implementation** that transforms raw RISC-V instruction data into:
-
-- 🔍 Structured extension groups  
-- 🔗 ISA cross-references  
-- 🧪 Verified outputs via unit tests  
-- 📊 Interactive graph visualizations  
 
 ---
 
@@ -44,6 +33,17 @@ A **complete 3-tier implementation** that transforms raw RISC-V instruction data
   <img src="https://github.com/user-attachments/assets/7411705b-df15-4880-a45f-e7a5b0984f88" width="48%"/>
   <img src="https://github.com/user-attachments/assets/00987db2-cafd-4a9e-a87e-448e21e44362" width="48%"/>
 </p>
+
+---
+
+## 🎯 Overview
+
+A **complete 3-tier implementation** that transforms raw RISC-V instruction data into:
+
+- 🔍 Structured extension groups  
+- 🔗 ISA cross-references  
+- 🧪 Verified outputs via unit tests  
+- 📊 Interactive graph visualizations  
 
 ---
 
