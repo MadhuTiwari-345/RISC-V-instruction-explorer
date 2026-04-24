@@ -29,24 +29,15 @@ A **complete 3-tier implementation** that transforms raw RISC-V instruction data
 ## 🖼️ Preview 
 
 <p align="center">
-  <img src="<img width="883" height="574" alt="{92C3A3A7-C3BD-40ED-B32C-FF3BF5D4D118}" src="https://github.com/user-attachments/assets/91418903-8974-44e1-98d9-cf7c2c3e3d68" />
-" width="800"/>
+  <img src="https://github.com/user-attachments/assets/91418903-8974-44e1-98d9-cf7c2c3e3d68" width="48%"/>
+  <img src="https://github.com/user-attachments/assets/686b0ffe-c10a-40a6-aff6-9748900ef14d" width="48%"/>
 </p>
 
 <p align="center">
-  <img src="<img width="854" height="574" alt="{9FB51AED-B59C-4FE9-9061-672C2C2ABC51}" src="https://github.com/user-attachments/assets/686b0ffe-c10a-40a6-aff6-9748900ef14d" />
-" width="800"/>
+  <img src="https://github.com/user-attachments/assets/7411705b-df15-4880-a45f-e7a5b0984f88" width="48%"/>
+  <img src="https://github.com/user-attachments/assets/00987db2-cafd-4a9e-a87e-448e21e44362" width="48%"/>
 </p>
 
-<p align="center">
-  <img src="<img width="854" height="575" alt="{85F0B19A-D647-4CC3-B334-E69460745ABB}" src="https://github.com/user-attachments/assets/7411705b-df15-4880-a45f-e7a5b0984f88" />
-" width="800"/>
-</p>
-
-<p align="center">
-  <img src="<img width="810" height="480" alt="graph" src="https://github.com/user-attachments/assets/00987db2-cafd-4a9e-a87e-448e21e44362" />
-" width="800"/>
-</p>
 ---
 
 ## ✨ Why This Stands Out
