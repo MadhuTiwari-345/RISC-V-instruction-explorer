@@ -1,46 +1,92 @@
-# RISC-V Instruction Set Explorer
 
-> RISC-V Mentorship Coding Challenge — All Three Tiers
+# 🚀 RISC-V Instruction Set Explorer
 
-A complete solution that parses the RISC-V instruction dictionary, cross-references it against the official ISA manual, runs a full unit-test suite, and renders an interactive force-directed extension-sharing graph.
+<p align="center">
+  <b>Deep Dive into RISC-V ISA — Parsing • Validation • Visualization</b>
+</p>
 
-Two implementations are provided:
-
-| File | Language | Requires network? |
-|------|----------|-------------------|
-| `riscv-explorer.html` | JavaScript (browser) | No — data embedded |
-| `src/explorer.py` | Python 3.8+ | Yes (Tier 1 & 2 fetch from GitHub) |
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.8+-blue?style=for-the-badge&logo=python"/>
+  <img src="https://img.shields.io/badge/JavaScript-Browser-yellow?style=for-the-badge&logo=javascript"/>
+  <img src="https://img.shields.io/badge/Tests-38%20Passing-success?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/Status-Complete-brightgreen?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/License-MIT-lightgrey?style=for-the-badge"/>
+</p>
 
 ---
 
-## Quick Start — Browser (recommended for submission demo)
+## 🎯 Overview
+
+A **complete 3-tier implementation** that transforms raw RISC-V instruction data into:
+
+- 🔍 Structured extension groups  
+- 🔗 ISA cross-references  
+- 🧪 Verified outputs via unit tests  
+- 📊 Interactive graph visualizations  
+
+---
+
+## 🖼️ Preview 
+
+<p align="center">
+  <img src="<img width="883" height="574" alt="{92C3A3A7-C3BD-40ED-B32C-FF3BF5D4D118}" src="https://github.com/user-attachments/assets/91418903-8974-44e1-98d9-cf7c2c3e3d68" />
+" width="800"/>
+</p>
+
+<p align="center">
+  <img src="<img width="854" height="574" alt="{9FB51AED-B59C-4FE9-9061-672C2C2ABC51}" src="https://github.com/user-attachments/assets/686b0ffe-c10a-40a6-aff6-9748900ef14d" />
+" width="800"/>
+</p>
+
+<p align="center">
+  <img src="<img width="854" height="575" alt="{85F0B19A-D647-4CC3-B334-E69460745ABB}" src="https://github.com/user-attachments/assets/7411705b-df15-4880-a45f-e7a5b0984f88" />
+" width="800"/>
+</p>
+
+<p align="center">
+  <img src="<img width="810" height="480" alt="graph" src="https://github.com/user-attachments/assets/00987db2-cafd-4a9e-a87e-448e21e44362" />
+" width="800"/>
+</p>
+---
+
+## ✨ Why This Stands Out
+
+- ⚡ **Zero-setup browser execution (offline)**
+- 🧠 **Smart normalization across inconsistent naming**
+- 🔬 **Cross-validation with official ISA manual**
+- 📈 **Graph-based insight into extension relationships**
+- 🧪 **Test-backed correctness (38 tests)**
+
+---
+
+## 🧰 Implementations
+
+| File | Language | Network |
+|------|----------|--------|
+| `riscv-explorer.html` | JavaScript | ❌ Offline |
+| `src/explorer.py` | Python | ✅ Required |
+
+---
+
+## ⚡ Quick Start
+
+### 🌐 Browser (Recommended)
 
 ```bash
-# Just open the file — no server, no install, no network needed
-open riscv-explorer.html          # macOS
-xdg-open riscv-explorer.html      # Linux
-start riscv-explorer.html         # Windows
-```
+start riscv-explorer.html
+````
 
-Click **▶ RUN ALL TIERS** and all three tiers execute instantly.
+👉 Click **▶ RUN ALL TIERS**
 
 ---
 
-## Quick Start — Python CLI
-
-### Requirements
-
-- Python 3.8+
-- `git` (for Tier 2 — clones the ISA manual repo)
-- No third-party packages required
-
-### Run all tiers
+### 🐍 Python CLI
 
 ```bash
 python src/explorer.py --all
 ```
 
-### Run individual tiers
+Run specific tiers:
 
 ```bash
 python src/explorer.py --tier1
@@ -48,19 +94,7 @@ python src/explorer.py --tier2
 python src/explorer.py --tier3
 ```
 
-### Save output to file
-
-```bash
-python src/explorer.py --all --output output/results.txt
-```
-
-### Use a local instr_dict.json
-
-```bash
-python src/explorer.py --all --json-url /path/to/instr_dict.json
-```
-
-### Run unit tests
+Run tests:
 
 ```bash
 python -m unittest tests/test_explorer.py -v
@@ -68,128 +102,93 @@ python -m unittest tests/test_explorer.py -v
 
 ---
 
-## Sample Output
+## 📊 Core Features
 
-### Tier 1
+### 🧩 Tier 1 — Instruction Parsing
 
-```
-──────────────────────────────────────────────────────────────
-  TIER 1 — Instruction Set Parsing
-──────────────────────────────────────────────────────────────
-  Source: https://raw.githubusercontent.com/...
-  Loaded 245 instruction entries.
+* Parses 245+ instructions
+* Groups by extension
+* Detects overlaps
 
-  EXTENSION TAG         |  COUNT  |  EXAMPLE MNEMONIC
-  ──────────────────────────────────────────────────
-  rv_a                  |     11  |  e.g. AMOADD.W
-  rv_c                  |     26  |  e.g. C.ADD
-  rv_d                  |     28  |  e.g. FADD.D
-  rv_f                  |     26  |  e.g. FADD.S
-  rv_i                  |     40  |  e.g. ADD
-  rv_m                  |      8  |  e.g. DIV
-  rv_zba                |      4  |  e.g. SH1ADD
-  ...
-  TOTAL                 |    262  |
+### 🔗 Tier 2 — Cross-Reference
 
-  Instructions belonging to multiple extensions (17):
-  ────────────────────────────────────────────────────
-  ADD.UW                →  rv_zba, rv64_zba
-  AES64DS               →  rv64_zknd, rv64_zkne
-  ANDN                  →  rv_zbb, rv_zbkb
-  CLMUL                 →  rv_zbc, rv_zbkc
-  MUL                   →  rv_m, rv_zmmul
-  ...
-```
+* Matches against ISA manual
+* Normalizes naming differences
+* Identifies mismatches
 
-### Tier 2
+### 📈 Tier 3 — Graph Analysis
 
-```
-──────────────────────────────────────────────────────────────
-  TIER 2 — Cross-Reference with ISA Manual
-──────────────────────────────────────────────────────────────
-  Cloning riscv-isa-manual …
-  Found 42 AsciiDoc files.
-  Extracted 847 unique candidate tokens.
-
-  Count summary: 23 matched, 0 in JSON only, 63 in manual only
-
-  Matched in both (23):
-    rv_a                       ↔  a
-    rv_c                       ↔  c
-    rv_zba                     ↔  zba
-    ...
-
-  In manual but NOT in JSON (63, first 40):
-    e  g  h  n  q  smstateen  svinval  svnapot  ...
-```
-
-### Tier 3 — Graph (text)
-
-```
-  Extension Sharing Edges (sorted by shared count):
-  ────────────────────────────────────────────────
-  rv_zbb                ──[5]──  rv_zbkb
-    shared: ANDN, ORN, ROL, ROR, XNOR
-  rv_zbc                ──[2]──  rv_zbkc
-    shared: CLMUL, CLMULH
-  rv_zba                ──[1]──  rv64_zba
-    shared: ADD.UW
-  ...
-```
-
-The browser version renders a live **force-directed canvas graph** where:
-- Node size = instruction count
-- Edge weight = number of shared instructions
-- Colour = extension family (base/FP/bitmanip/crypto/vector)
-- Hover = tooltip with instruction list
+* Extension relationships
+* Shared instruction mapping
+* Interactive visualization
 
 ---
 
-## Project Structure
+## 🧠 Visualization
+
+* Node size → instruction count
+* Edge weight → shared instructions
+* Color → extension family
+* Hover → instruction details
+
+---
+
+## 📁 Project Structure
 
 ```
-riscv-submission/
-├── riscv-explorer.html     # Self-contained browser app (all 3 tiers)
+RISC-V-instruction-explorer/
+├── README.md
+├── riscv-explorer.html
 ├── src/
-│   └── explorer.py         # Python CLI (all 3 tiers)
 ├── tests/
-│   └── test_explorer.py    # 38 unit tests
 ├── output/
-│   └── sample_output.txt   # Sample run output
-└── README.md
 ```
 
 ---
 
-## Design Decisions
+## ⚙️ Key Design Decisions
 
-### Extension name normalisation (Tier 2)
-The two sources use different naming conventions:
+### 🔹 Normalization Strategy
 
-| Source | Example | Normalised |
-|--------|---------|------------|
-| `instr_dict.json` | `rv_zba`, `rv32_zknd` | strip `rv\d*_` → `zba`, `zknd` |
-| ISA manual AsciiDoc | `Zba`, `M`, `Zicsr` | lowercase → `zba`, `m`, `zicsr` |
-
-A single regex `^rv\d*_` handles all observed JSON prefix variants. Both sides are then lowercased for comparison. No hard-coded mapping table — the rule-based approach handles new extensions automatically.
-
-### AsciiDoc scanning strategy
-The scanner uses a broad capitalised-token regex (`\b[A-Z][a-zA-Z0-9]{0,35}\b`) and filters against a curated stop-word list. This means **"manual only"** will always contain false positives (section titles, abbreviations like `WARL`). The meaningful metrics are **matched** and **JSON only** — both are clean.
-
-### No network in the browser version
-Browser sandboxes block cross-origin `fetch()` to GitHub. Rather than fight CORS proxies, the HTML file embeds 245 real instructions as a JS literal — instant load, works offline, zero errors.
-
-### Cached git clone (Python Tier 2)
-`git clone --depth=1` on first run; `git pull` on repeat runs. Stored in the system temp directory so the working directory stays clean and re-runs take under a second.
-
-### Graph representation
-Adjacency dict `{ ext → { neighbour → [shared_mnemonics] } }` gives O(1) lookup and trivial serialisation. The browser renders a Fruchterman-Reingold force simulation on `<canvas>`.
+* Regex-based (`^rv\d*_`)
+* Lowercase transformation
+* No hardcoding → future-proof
 
 ---
 
-## Assumptions
+### 🔹 Offline Browser Mode
 
-1. `instr_dict.json` values may be a dict, list, or string — the parser handles all three.
-2. Entries with no extension tag go into a `_unknown` bucket rather than being silently dropped.
-3. The ISA manual `src/` directory contains the authoritative AsciiDoc sources. If absent, the whole repo root is scanned.
-4. "Manual only" tokens include English words that slip through the stop-word filter — this is expected and documented.
+* Embedded dataset
+* No CORS issues
+* Instant execution
+
+---
+
+### 🔹 Efficient Graph Model
+
+* Adjacency dictionary
+* Fast lookups
+* Easy visualization
+
+---
+
+## 📌 Assumptions
+
+* Flexible JSON schema supported
+* Missing extensions → `_unknown`
+* Manual parsing may include noise (expected)
+
+---
+
+## 🏁 Final Thoughts
+
+This project focuses on:
+
+✔ Accuracy
+✔ Scalability
+✔ Clarity of insights
+
+while staying lightweight and easy to run.
+
+---
+
