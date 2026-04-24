@@ -18,7 +18,7 @@
   <img src="https://img.shields.io/badge/JavaScript-Browser-yellow?style=for-the-badge&logo=javascript"/>
   <img src="https://img.shields.io/badge/Tests-38%20Passing-success?style=for-the-badge"/>
   <img src="https://img.shields.io/badge/Status-Complete-brightgreen?style=for-the-badge"/>
-  <img src="https://img.shields.io/badge/License-MIT-lightgrey?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/License-MIT-brightgreen?style=for-the-badge"/>
 </p>
 
 ---
