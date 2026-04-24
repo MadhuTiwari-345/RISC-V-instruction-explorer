@@ -1,4 +1,11 @@
 
+## 🚀 Project Banner
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/3a3415aa-fc5f-4e29-83a8-a42021269292" width="900"/>
+</p>
+
+
 # 🚀 RISC-V Instruction Set Explorer
 
 <p align="center">
@@ -176,7 +183,9 @@ RISC-V-instruction-explorer/
 This project focuses on:
 
 ✔ Accuracy
+
 ✔ Scalability
+
 ✔ Clarity of insights
 
 while staying lightweight and easy to run.
