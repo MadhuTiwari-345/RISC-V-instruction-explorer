@@ -15,6 +15,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.8+-blue?style=for-the-badge&logo=python"/>
+  <img src="https://img.shields.io/badge/HTML-5-red?style=for-the-badge&logo=HTML"/>
   <img src="https://img.shields.io/badge/JavaScript-Browser-yellow?style=for-the-badge&logo=javascript"/>
   <img src="https://img.shields.io/badge/Tests-38%20Passing-success?style=for-the-badge"/>
   <img src="https://img.shields.io/badge/Status-Complete-brightgreen?style=for-the-badge"/>
