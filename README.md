@@ -131,12 +131,14 @@ python -m unittest tests/test_explorer.py -v
 - 🔁 **17 multi-extension overlaps detected**
 
 **Top Extensions:**
+
 rv_i   → 40 instructions  
 rv_d   → 28 instructions  
 rv_c   → 26 instructions  
 rv_f   → 26 instructions  
 
 **Multi-Extension Examples:**
+
 ADD.UW   → rv_zba, rv64_zba  
 AES64DS  → rv64_zknd, rv64_zkne  
 ANDN     → rv_zbb, rv_zbkb  
@@ -154,6 +156,7 @@ ANDN     → rv_zbb, rv_zbkb
 - ⚠️ Manual-only: **63** (expected noise)
 
 **Example Matches:**
+
 rv_a   ↔ a  
 rv_c   ↔ c  
 rv_zba ↔ zba  
@@ -163,6 +166,7 @@ rv_zba ↔ zba
 ### 📈 Tier 3 — Graph Analysis
 
 **Top Relationships (by shared instructions):**
+
 rv_zbb  ──[5]── rv_zbkb  
 rv_zbc  ──[2]── rv_zbkc  
 rv_zba  ──[1]── rv64_zba  
