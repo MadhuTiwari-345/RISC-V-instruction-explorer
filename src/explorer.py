@@ -262,7 +262,7 @@ def _scan_adoc(text: str) -> Set[str]:
         # Inline references are accepted only when the text explicitly calls
         # the token an extension, not merely because it is capitalised.
         for match in re.finditer(
-            r"\b(?:the\s+)?([ZSX][a-z][a-z0-9]*|[IEMAFDQ LCBJTPVNHG])"
+            r"\b(?:the\s+)?([ZSX][a-z][a-z0-9]*|[IEMAFDQLCBJTPVNHG])"
             r"\s+(?:standard\s+)?extension\b"
             r"|\bextension\s+([ZSX][a-z][a-z0-9]*|[IEMAFDQLCBJTPVNHG])\b",
             stripped,
