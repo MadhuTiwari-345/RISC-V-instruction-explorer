@@ -25,21 +25,23 @@ INSTR_DICT_URL = (
 )
 MANUAL_REPO_URL = "https://github.com/riscv/riscv-isa-manual"
 
-# Stop-words that appear capitalised in AsciiDoc but are NOT extension names
-ADOC_STOP_WORDS: Set[str] = {
-    "The","This","These","That","Those","A","An","In","Is","It","If","As","At",
-    "Be","By","Do","For","From","Has","Have","He","Her","His","How","I","My",
-    "No","Not","Of","On","Or","Our","Out","So","To","Up","Was","We","Will",
-    "With","You","All","Are","But","Can","Its","New","One","See","Set","Use",
-    "When","Which","Who","Why","Your","NOTE","WARNING","TIP","CAUTION",
-    "IMPORTANT","ISA","ABI","CPU","ALU","CSR","PC","SP","GPR","FPR","RISC",
-    "MISA","HART","XLEN","FLEN","VLEN","ELEN","MXLEN","Table","Figure",
-    "Section","Chapter","Appendix","Example","Register","Registers",
-    "Instruction","Instructions","Extension","Extensions","Privilege",
-    "Unprivileged","Volume","Version","Number","Name","Value","Type","Mode",
-    "True","False","None","List","File","Description","RV32","RV64","RV128",
-    "WARL","WLRL","SBI","ELF","MEM","BIT","RISC-V",
+# RISC-V single-letter extension identifiers. Multi-letter extensions are
+# recognised only in explicit ISA contexts (headings / "extension" labels).
+SINGLE_LETTER_EXTS: Set[str] = set("iemafdqlcbjtpvnhg")
+
+# Ordinary words that can resemble multi-letter extension IDs in headings.
+ADOC_NON_EXT_WORDS: Set[str] = {
+    "zero", "section", "chapter", "appendix", "table", "figure",
+    "example", "instruction", "instructions", "extension", "extensions",
+    "privileged", "unprivileged", "overview", "introduction", "version",
+    "implementation", "architecture", "control", "status", "register",
+    "registers", "machine", "supervisor", "hypervisor", "user",
 }
+
+# A multi-letter extension identifier starts with Z, S, or X and is kept
+# deliberately conservative: it is accepted only in an ISA-labelled context.
+MULTI_EXT_ID = re.compile(r"^[ZSX][a-z][a-z0-9]*$", re.IGNORECASE)
+
 
 
 # ── Shared utilities ───────────────────────────────────────────────────────────
@@ -208,12 +210,66 @@ def run_tier1(source: str, out_lines: List[str]) -> Tuple[Optional[dict], Option
 # ══════════════════════════════════════════════════════════════════════════════
 
 def _scan_adoc(text: str) -> Set[str]:
-    """Extract candidate extension names from one AsciiDoc file."""
+    """
+    Extract extension identifiers from explicit ISA-manual contexts.
+
+    Unlike the previous capitalised-word scan, this does not treat arbitrary
+    prose, names, or title-case words as extensions. It recognises:
+      * AsciiDoc section headings whose leading token is an extension ID;
+      * explicit labels such as "the Zba extension" or "extension Zicsr";
+      * single-letter extension names only when explicitly labelled.
+
+    Returned identifiers are lowercase and prefix-free (zba, i, smstateen).
+    """
     found: Set[str] = set()
-    for m in re.finditer(r"\b([A-Z][a-zA-Z0-9]{0,35})\b", text):
-        tok = m.group(1)
-        if tok not in ADOC_STOP_WORDS:
-            found.add(tok.lower())
+
+    def add_candidate(raw: str) -> None:
+        token = raw.strip().strip(".,:;()[]{}")
+        if not token:
+            return
+        if len(token) == 1:
+            normal = token.lower()
+            if normal in SINGLE_LETTER_EXTS:
+                found.add(normal)
+            return
+        if MULTI_EXT_ID.fullmatch(token):
+            normal = token.lower()
+            if normal not in ADOC_NON_EXT_WORDS:
+                found.add(normal)
+
+    for line in text.splitlines():
+        # Remove AsciiDoc comments and attribute declarations; they are not
+        # evidence that an extension is documented in the manual body.
+        stripped = line.strip()
+        if not stripped or stripped.startswith("//") or stripped.startswith(":"):
+            continue
+
+        # Section titles conventionally start with an extension identifier:
+        # "=== Zba: Address Generation" or "=== M Extension".
+        heading = re.match(r"^={2,6}\s+(.+?)\s*$", stripped)
+        if heading:
+            title = re.sub(r"\s+\[.*$", "", heading.group(1)).strip()
+            first = re.match(r"^([A-Za-z][A-Za-z0-9]*)\b", title)
+            if first:
+                add_candidate(first.group(1))
+            # Also support headings written as "M Extension".
+            single_heading = re.match(
+                r"^([A-Z])\s+(?:Extension|Standard Extension)\b", title
+            )
+            if single_heading:
+                add_candidate(single_heading.group(1))
+
+        # Inline references are accepted only when the text explicitly calls
+        # the token an extension, not merely because it is capitalised.
+        for match in re.finditer(
+            r"\b(?:the\s+)?([ZSX][a-z][a-z0-9]*|[IEMAFDQ LCBJTPVNHG])"
+            r"\s+(?:standard\s+)?extension\b"
+            r"|\bextension\s+([ZSX][a-z][a-z0-9]*|[IEMAFDQLCBJTPVNHG])\b",
+            stripped,
+            flags=re.IGNORECASE,
+        ):
+            add_candidate(match.group(1) or match.group(2))
+
     return found
 
 
