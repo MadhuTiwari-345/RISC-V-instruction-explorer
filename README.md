@@ -12,6 +12,12 @@
   <i>A zero-setup RISC-V analysis tool that parses, validates, and visualizes ISA structure—revealing hidden relationships across extensions.</i>
 </p>
 
+<p align="center">
+  <a href="https://risc-v-instruction-explorer.vercel.app/"><strong>🚀 Open Live Explorer</strong></a>
+  ·
+  <a href="https://github.com/MadhuTiwari-345/RISC-V-instruction-explorer">Source Code</a>
+</p>
+
 
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.8+-blue?style=for-the-badge&logo=python"/>
@@ -63,8 +69,8 @@ A **complete 3-tier implementation** that transforms raw RISC-V instruction data
 
 | File | Language | Network |
 |------|----------|--------|
-| `riscv-explorer.html` | JavaScript | ❌ Offline |
-| `src/explorer.py` | Python | ✅ Required |
+| `index.html` / `riscv-explorer.html` | JavaScript | ❌ Offline after load |
+| `src/explorer.py` | Python | ✅ Required for remote dataset + manual scan |
 
 ---
 
@@ -80,6 +86,8 @@ start riscv-explorer.html
 ---
 
 ### 🐍 Python CLI
+
+The Python CLI fetches the instruction dictionary and clones/scans the ISA manual, so it needs an internet connection and Git installed for the full three-tier run.
 
 ```bash
 python src/explorer.py --all
