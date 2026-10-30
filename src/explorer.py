@@ -20,8 +20,8 @@ from typing import Dict, List, Set, Tuple, Optional
 # ── Constants ──────────────────────────────────────────────────────────────────
 
 INSTR_DICT_URL = (
-    "https://raw.githubusercontent.com/rpsene/"
-    "riscv-extensions-landscape/main/instr_dict.json"
+    "https://raw.githubusercontent.com/riscv/"
+    "riscv-isa-explorer/main/src/instr_dict.json"
 )
 MANUAL_REPO_URL = "https://github.com/riscv/riscv-isa-manual"
 
