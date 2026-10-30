@@ -90,11 +90,18 @@ def _extract_extensions(entry) -> List[str]:
         raw = [raw]
 
     result: List[str] = []
-    def _flat(x):
-        if isinstance(x, list):
-            for item in x: _flat(item)
-        elif x:
-            result.append(str(x).lower().strip())
+    seen: Set[str] = set()
+
+    def _flat(value):
+        if isinstance(value, (list, tuple, set)):
+            for item in value:
+                _flat(item)
+        elif isinstance(value, str):
+            tag = value.strip().lower()
+            if tag and tag not in seen:
+                seen.add(tag)
+                result.append(tag)
+
     _flat(raw)
     return result
 
@@ -120,8 +127,13 @@ def parse_instructions(data: dict) -> Tuple[Dict[str, List[str]], List[dict]]:
     grouped: Dict[str, List[str]] = defaultdict(list)
     multi_ext = []
 
+    if not isinstance(data, dict):
+        raise TypeError("Instruction data must be a JSON object keyed by mnemonic.")
+
     for mnemonic, entry in data.items():
-        M = mnemonic.upper()
+        if not isinstance(mnemonic, str) or not mnemonic.strip():
+            continue
+        M = mnemonic.strip().upper()
         exts = _extract_extensions(entry)
 
         if not exts:
@@ -254,10 +266,12 @@ def cross_reference(
 ) -> Tuple[Set[str], Set[str], Set[str]]:
     """Compare normalised extension sets; return (matched, json_only, manual_only)."""
     json_norm: Dict[str, str] = {norm_json_ext(k): k for k in grouped}
+    manual_norm = {norm_manual_ext(token.strip()) for token in manual_tokens
+                   if isinstance(token, str) and token.strip()}
 
-    matched    = {n for n in json_norm if n in manual_tokens}
-    json_only  = {n for n in json_norm if n not in manual_tokens}
-    manual_only = {t for t in manual_tokens if t not in json_norm}
+    matched    = {n for n in json_norm if n in manual_norm}
+    json_only  = {n for n in json_norm if n not in manual_norm}
+    manual_only = {t for t in manual_norm if t not in json_norm}
 
     # ── Print results ──────────────────────────────────────────────
     _out(out_lines, f"\n  Count summary: {len(matched)} matched, "
@@ -388,10 +402,13 @@ def main():
     if t1 or t2 or t3:
         grouped, multi_ext = run_tier1(args.json_url, out_lines)
 
-    if t2 and grouped:
+    if grouped is None:
+        sys.exit(2)
+
+    if t2:
         run_tier2(grouped, args.manual_repo, out_lines)
 
-    if t3 and grouped:
+    if t3:
         run_tier3_graph(grouped, out_lines)
 
     _out(out_lines, "\n" + "=" * 62)
