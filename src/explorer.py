@@ -31,7 +31,7 @@ SINGLE_LETTER_EXTS: Set[str] = set("iemafdqlcbjtpvnhg")
 
 # Ordinary words that can resemble multi-letter extension IDs in headings.
 ADOC_NON_EXT_WORDS: Set[str] = {
-    "zero", "section", "chapter", "appendix", "table", "figure",
+    "zero", "supervisor", "standard", "summary", "system", "security", "software", "support", "state", "status", "scalar", "section", "chapter", "appendix", "table", "figure",
     "example", "instruction", "instructions", "extension", "extensions",
     "privileged", "unprivileged", "overview", "introduction", "version",
     "implementation", "architecture", "control", "status", "register",
