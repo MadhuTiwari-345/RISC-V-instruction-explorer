@@ -504,7 +504,7 @@ function runAll(){
   }catch(e){
     log_(1,'ERROR: '+e.message,'warn');
     document.getElementById('o1').innerHTML='<div class="err">'+e.message+'</div>';
-    led(1,'err','error');btn.disabled=false;btn.textContent='&#9654; RUN ALL TIERS';return;
+    led(1,'err','error');btn.disabled=false;btn.textContent='▶ RUN ALL TIERS';return;
   }
 
   // TIER 2 — local cross-reference, no network needed
@@ -550,7 +550,7 @@ function runAll(){
   document.getElementById('o3').innerHTML=h3;
   led(3,'ok',passed+'/'+tr.length+' tests &middot; '+bg.edgeLabels.size+' edges');
   requestAnimationFrame(function(){renderGraph(_grouped,bg.adj,bg.edgeLabels);});
-  btn.disabled=false;btn.textContent='&#8635; RUN AGAIN';
+  btn.disabled=false;btn.textContent='↻ RUN AGAIN';
 }
 </script>
 </body>
