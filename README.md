@@ -388,3 +388,7 @@ By combining parsing, validation, and visualization, this work transforms static
 
 ---
 
+
+### Tier 2 extraction accuracy
+
+Tier 2 no longer treats every capitalised word in the manual as an extension. It now extracts identifiers only from AsciiDoc section headings and explicit phrases such as `the Zba extension` or `extension Zicsr`. Single-letter extensions are accepted only in these labelled contexts. Ordinary prose, instruction mnemonics, and generic headings are ignored to reduce false manual-only matches.
