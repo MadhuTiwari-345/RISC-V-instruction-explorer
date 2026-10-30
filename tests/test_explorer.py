@@ -63,6 +63,15 @@ class TestExtractExtensions(unittest.TestCase):
         r = _extract_extensions([["rv_i", "rv_m"]])
         self.assertIn("rv_i", r); self.assertIn("rv_m", r)
 
+    def test_duplicate_tags_are_removed(self):
+        self.assertEqual(
+            _extract_extensions(["RV_I", "rv_i", ["rv_m", "rv_m"]]),
+            ["rv_i", "rv_m"],
+        )
+
+    def test_non_string_values_are_ignored(self):
+        self.assertEqual(_extract_extensions(["rv_i", None, 42, {"tag": "rv_m"}]), ["rv_i"])
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 # parse_instructions
@@ -112,6 +121,18 @@ class TestParseInstructions(unittest.TestCase):
         g, m = parse_instructions({})
         self.assertEqual(g, {})
         self.assertEqual(m, [])
+
+    def test_invalid_top_level_input(self):
+        with self.assertRaises(TypeError):
+            parse_instructions(["not", "a", "mapping"])
+
+    def test_duplicate_extension_does_not_duplicate_instruction(self):
+        grouped, multi = parse_instructions({
+            "add": {"extension": ["rv_i", "RV_I", "rv_m", "rv_m"]}
+        })
+        self.assertEqual(grouped["rv_i"], ["ADD"])
+        self.assertEqual(grouped["rv_m"], ["ADD"])
+        self.assertEqual(len(multi), 1)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
