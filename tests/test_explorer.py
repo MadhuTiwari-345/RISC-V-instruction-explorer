@@ -167,22 +167,37 @@ class TestNormalisation(unittest.TestCase):
 
 class TestScanAdoc(unittest.TestCase):
 
-    def test_finds_extension_names(self):
-        text = "The Zba extension defines SH1ADD. See also Zicsr and M."
-        f = _scan_adoc(text)
-        self.assertIn("zba", f); self.assertIn("zicsr", f); self.assertIn("m", f)
+    def test_finds_extension_ids_in_section_headings(self):
+        text = """
+=== Zba: Address Generation
+=== Zicsr: Control and Status Register Instructions
+=== M Extension
+"""
+        found = _scan_adoc(text)
+        self.assertEqual(found, {"zba", "zicsr", "m"})
 
-    def test_filters_stop_words(self):
-        text = "The ISA Extensions manual describes Instructions."
-        f = _scan_adoc(text)
-        self.assertNotIn("the", f)
-        self.assertNotIn("extensions", f)
-        self.assertNotIn("instructions", f)
+    def test_finds_explicit_inline_extension_labels(self):
+        text = "The Zbb extension adds bit-manipulation instructions. The extension Zifencei provides instruction-fetch synchronization."
+        found = _scan_adoc(text)
+        self.assertEqual(found, {"zbb", "zifencei"})
+
+    def test_ignores_capitalized_prose_and_examples(self):
+        text = """
+The Manual Describes Important Architectural Concepts.
+Zero is a common word. Machine, Register, Table, and Figure are prose.
+SH1ADD, ADD, and Zba are mentioned without an extension label.
+"""
+        self.assertEqual(_scan_adoc(text), set())
+
+    def test_ignores_non_extension_heading(self):
+        text = "=== Introduction to the Privileged Architecture\n=== Zero-Instruction Overview"
+        self.assertEqual(_scan_adoc(text), set())
 
     def test_independent_calls(self):
-        a = _scan_adoc("Zba Zbb")
-        b = _scan_adoc("Zbc Zbd")
-        self.assertIn("zba", a); self.assertIn("zbc", b)
+        a = _scan_adoc("=== Zba: Address Generation")
+        b = _scan_adoc("=== Zbc: Carry-less Multiplication")
+        self.assertEqual(a, {"zba"})
+        self.assertEqual(b, {"zbc"})
 
     def test_empty_text(self):
         self.assertEqual(_scan_adoc(""), set())
